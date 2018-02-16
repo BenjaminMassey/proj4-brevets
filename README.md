@@ -1,12 +1,19 @@
 # Project 4:  Brevet time calculator with Ajax
 
 A reimplmentation of the calculator here:
+
 https://rusa.org/octime_acp.html
+
 based on the rules here:
+
 https://rusa.org/octime_alg.html
 
+
+
 Created by Benjamin Massey for CIS 322
-(Based haveily on code given from the class)
+
+(Based heavily on code given from the class)
+
 Contact him at benjamin.w.massey@gmail.com
 
 ## Basics of the Calculations
