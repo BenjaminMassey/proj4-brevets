@@ -9,6 +9,7 @@ from flask import request
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
 import config
+import sys
 
 import logging
 
@@ -52,14 +53,37 @@ def _calc_times():
     Expects one URL-encoded argument, the number of miles.
     """
     app.logger.debug("Got a JSON request")
-    km = request.args.get('km', 999, type=float)
+    notes = ""
+    km = request.args.get('km', 0, type=float)
+    brevet = request.args.get('brevet', 200, type=int)
+    if km > brevet:
+        if brevet * 1.2 < km:
+            notes = "Distance much longer than brevet - an accident?"
+        else:
+            notes = "Distance a bit longer than brevet, so used brevet"
+    if km < 15:
+        notes = "Distance a bit small - might cause weirdness"
+    beginDate = request.args.get('beginDate', "2017-01-01", type=str)
+    beginTime = request.args.get('beginTime', "00:00", type=str)
+    splitBeginDate = beginDate.split("-")
+    beginYear = splitBeginDate[0]
+    beginMonth = splitBeginDate[1]
+    beginDay = splitBeginDate[2]
+    splitBeginTime = beginTime.split(":")
+    beginHour = splitBeginTime[0]
+    beginMin = splitBeginTime[1]
+    beginTimeFinal = beginYear+"-"+beginMonth+"-"+beginDay+"T"+beginHour+":"+beginMin
+    print("km:", km, file=sys.stderr)
+    print("brevet:", brevet, file=sys.stderr)
+    print("beginTime:", beginTimeFinal, file=sys.stderr)
     app.logger.debug("km={}".format(km))
+    app.logger.debug("brevet={}".format(brevet))
     app.logger.debug("request.args: {}".format(request.args))
     # FIXME: These probably aren't the right open and close times
     # and brevets may be longer than 200km
-    open_time = acp_times.open_time(km, 200, arrow.now().isoformat)
-    close_time = acp_times.close_time(km, 200, arrow.now().isoformat)
-    result = {"open": open_time, "close": close_time}
+    open_time = acp_times.open_time(km, brevet, beginTimeFinal)#arrow.now().isoformat)
+    close_time = acp_times.close_time(km, brevet, beginTimeFinal)#arrow.now().isoformat)
+    result = {"open": open_time, "close": close_time, "notes": notes}
     return flask.jsonify(result=result)
 
 

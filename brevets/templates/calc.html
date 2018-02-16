@@ -104,7 +104,7 @@
       <!-- Close time (read only, set by JavaScript function -->
       <td><input name="close" type="datetime" value="" readonly /></td>
       <!-- Notes (error messages for this row) -->
-      <td class="notes"> &nbsp; </td>
+      <td><input name="notes" type= "string" value="" size="50"readonly /></td>
     </tr>
     {% endfor %}
   </table>
@@ -123,11 +123,32 @@
   // (If we want to also keep the ISO-formatted times, we'll need to
   // stash them in hidden fields.) 
   function calc_times(control) {
+  
+	//https://stackoverflow.com/a/1085810
+	var brevetRAW = document.getElementById("brevet_dist_km");
+	var brevet = brevetRAW.options[brevetRAW.selectedIndex].value;
+	console.log("Brevet = " + brevet);
+	
+	var beginDateRAW = document.getElementById("begin_date");
+	var beginDate = beginDateRAW.value;
+	console.log("Beginning Date = " + beginDate);
+	
+	var beginTimeRAW = document.getElementById("begin_time");
+	var beginTime = beginTimeRAW.value;
+	console.log("Beginning Time = " + beginTime);
+  
     var km = control.find("input[name='km']").val();
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
+	var notes_field = control.find("input[name='notes']");
     
-    $.getJSON(TIME_CALC_URL, { km: km }, 
+    $.getJSON(TIME_CALC_URL, 
+		{ 
+			km: km, 
+			brevet: brevet,
+			beginDate: beginDate,
+			beginTime: beginTime
+		}, 
       // response handler
       function(data) {
          var times = data.result;
@@ -135,7 +156,8 @@
          console.log("Response.open = " + times.open);
          open_time_field.val( moment(times.open).format("ddd M/D H:mm"));
          close_time_field.val( moment(times.close).format("ddd M/D H:mm"));
-       } // end of handler function
+		 notes_field.val(times.notes);
+	   } // end of handler function
      );// End of getJSON
     }
 
